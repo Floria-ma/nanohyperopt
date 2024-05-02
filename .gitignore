@@ -1,0 +1,5 @@
+# ignore pkl files
+**.pkl
+
+# ignore compiled python
+**__pycache__

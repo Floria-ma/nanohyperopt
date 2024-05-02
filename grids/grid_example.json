@@ -1,0 +1,9 @@
+[
+{"variable": "MET_pt",
+ "cuttype": "min",
+ "hptype": "quniform",
+ "minvalue": 0.0, 
+ "maxvalue": 500.0, 
+ "stepsize": 5.0
+}
+]
