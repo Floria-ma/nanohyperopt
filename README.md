@@ -28,8 +28,8 @@ One can plot the loss of each iteration using `python3 plot_loss.py -i output_te
 
 ![](docs/output_test.png)
 
-For many iterations, the loss is 0 as no 'signal' events pass the selection for any MET cut above 55 GeV.
-Note: the loss function is defined here as -S/B, but that can be changed as needed.
+For many iterations, the loss is 0 as no 'background' events pass the selection for any MET cut above 55 GeV, in which case the loss is set to 0.
+Note: the loss function is defined here as -S/B, which is not properly defined if B=0, but that definition can be changed to something more appropriate as needed.
 In this simple example, we know that the lowest loss should be achieved for a MET cut of 50 GeV, i.e. the grid point as close to 55 GeV as possible without exceeding it.
 This can be checked using `python3 get_best.py -i output_test.pkl -n 10`, which prints out the 10 best configurations, the top one of which reads as follows:
 
