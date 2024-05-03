@@ -14,6 +14,10 @@ from coffea.nanoevents import NanoEventsFactory, NanoAODSchema
 from hyperopt import hp, fmin, tpe, STATUS_OK, Trials
 from functools import partial
 
+# local imports
+sys.path.append('tools')
+from make_input_file import make_input_file
+
 
 def pass_selection( events, cuts ):
     ### get a mask for a particular configuration of cuts
@@ -93,11 +97,12 @@ if __name__=='__main__':
 
     # read arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--inputfile', required=True)
+    parser.add_argument('-s', '--sigfiles', required=True, nargs='+')
+    parser.add_argument('-b', '--bkgfiles', default=[], nargs='+')
     parser.add_argument('-g', '--gridfile', required=True)
     parser.add_argument('-o', '--outputfile', default=None)
     parser.add_argument('-n', '--niterations', type=int, default=10)
-    parser.add_argument('--nentries', type=int, default=-1)
+    parser.add_argument('--nentriesperfile', type=int, default=-1)
     parser.add_argument('--nstartup', type=int, default=10)
     args = parser.parse_args()
 
@@ -105,16 +110,22 @@ if __name__=='__main__':
     print('Running with following configuration:')
     for arg in vars(args): print('  - {}: {}'.format(arg,getattr(args,arg))) 
 
-    # load the events array
-    events = NanoEventsFactory.from_root(
-      args.inputfile,
-      entry_stop=args.nentries if args.nentries>=0 else None,
-      schemaclass=NanoAODSchema
-    ).events()
+    # load the input files
+    sigvar = 'isSignal'
+    events = make_input_file(sigfiles=args.sigfiles,
+      bkgfiles=args.bkgfiles,
+      nentriesperfile=args.nentriesperfile,
+      sigvar=sigvar)
 
     # define signal mask
-    # todo: update to something realistic
-    sig_mask = (events.MET.pt > 55.)
+    #sig_mask = (events.MET.pt > 55.) # only for testing
+    sig_mask = getattr(events, sigvar)
+
+    # do some printouts
+    print('Number of events from inut files:')
+    print(' - Signal: {}'.format(ak.sum(sig_mask)))
+    print(' - Background: {}'.format(ak.sum(~sig_mask)))
+    print(' - Total: {}'.format(len(events)))
     
     # get the grid
     with open(args.gridfile,'rb') as f:
