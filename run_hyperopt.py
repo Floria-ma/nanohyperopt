@@ -58,7 +58,7 @@ def pass_selection( events, cuts ):
 
 def calculate_loss( events, cuts,
                     sig_mask=None,
-                    lossfunction='negsoverb',
+                    lossfunction='s/b',
                     iteration=None):
     ### calculate the loss function for a given configuration of cuts
 
@@ -77,9 +77,15 @@ def calculate_loss( events, cuts,
     nbkg_pass = np.sum((~sig_mask) & (sel_mask))
 
     # calculate loss
-    if lossfunction=='negsoverb':
+    if lossfunction=='s/b':
         if nbkg_pass == 0: loss = 0.
         else: loss = -nsig_pass / nbkg_pass
+    elif lossfunction=='s/sqrt(b)':
+        if nbkg_pass == 0: loss = 0
+        else: loss = -nsig_pass / np.sqrt(nbkg_pass)
+    elif lossfunction=='s/sqrt(s+b)':
+        if( nsig_pass==0 and nbkg_pass==0 ): loss = 0
+        else: loss = -nsig_pass / np.sqrt(nsig_pass + nbkg_pass)
     else:
         msg = 'ERROR: loss function {} not recognized.'.format(lossfunction)
         raise Exception(msg)
@@ -102,6 +108,7 @@ if __name__=='__main__':
     parser.add_argument('-g', '--gridfile', required=True)
     parser.add_argument('-o', '--outputfile', default=None)
     parser.add_argument('-n', '--niterations', type=int, default=10)
+    parser.add_argument('-l', '--lossfunction', default='s/b')
     parser.add_argument('--nentriesperfile', type=int, default=-1)
     parser.add_argument('--nstartup', type=int, default=10)
     args = parser.parse_args()
@@ -141,6 +148,7 @@ if __name__=='__main__':
     best = fmin(
       fn=partial(calculate_loss, events,
                  sig_mask=sig_mask,
+                 lossfunction=args.lossfunction,
                  iteration=iteration
       ),
       space=grid,
