@@ -20,6 +20,10 @@ def pass_selection( events, cuts ):
     # input arguments:
     # - events: NanoAOD events array
     # - cuts: dictionary mapping a variable name to a cut value
+    #         note: each key in the dict is supposed to be formatted
+    #               as <variable name>_<type>, where <type> is either min or max,
+    #               and <variable name> can contain underscores for sub-variables,
+    #               e.g. MET_pt for MET.pt
     mask = np.ones(len(events)).astype(bool)
     for cutname, cutvalue in cuts.items():
         # parse cut name
@@ -28,12 +32,20 @@ def pass_selection( events, cuts ):
         if( not (ismax or ismin) ): 
             raise Exception('ERROR: cut {} is neither min nor max.'.format(cutname))
         varname = cutname[:-4]
+        # parse variable name
+        varnameparts = varname.split('_')
         # get the variable value
-        # todo: update to other scenarios
-        varvalue = None
-        if varname=='MET_pt': varvalue = events.MET.pt
+        varvalue = getattr(events, varnameparts[0])
+        for varnamepart in varnameparts[1:]: varvalue = getattr(varvalue, varnamepart)
+        # if the varvalue is an array instead of a single value per event,
+        # take minimum or maximum depending on the cut type
+        if(varvalue.layout.minmax_depth[0]==1): pass
+        elif(varvalue.layout.minmax_depth[0]==2): 
+            if ismin: varvalue = ak.min(varvalue, axis=-1)
+            if ismax: varvalue = ak.max(varvalue, axis=-1)
         else:
-            raise Exception('ERROR: variable {} not recognized.'.format(varname))
+            msg = 'ERROR: shape of value array for variable {} not recognized.'.format(varname)
+            raise Exception(msg)
         # perform the cut
         if ismax: mask = ((mask) & (varvalue < cutvalue))
         if ismin: mask = ((mask) & (varvalue > cutvalue))
