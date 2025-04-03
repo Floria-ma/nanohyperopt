@@ -17,6 +17,7 @@ from functools import partial
 # local imports
 sys.path.append('tools')
 from make_input_file import make_input_file
+from variabletools import read_variables
 
 
 def pass_selection( events, cuts ):
@@ -109,21 +110,66 @@ if __name__=='__main__':
     parser.add_argument('-o', '--outputfile', default=None)
     parser.add_argument('-n', '--niterations', type=int, default=10)
     parser.add_argument('-l', '--lossfunction', default='s/b')
+    parser.add_argument('--genmatchbranch', required=True)
     parser.add_argument('--nentriesperfile', type=int, default=-1)
     parser.add_argument('--nstartup', type=int, default=10)
     args = parser.parse_args()
 
-    # print arguments
-    print('Running with following configuration:')
-    for arg in vars(args): print('  - {}: {}'.format(arg,getattr(args,arg))) 
+    # read variables
+    variables = read_variables(args.variables)
+    variablelist = [v.variable for v in variables]
 
+    # set branches to read
+    branches_to_read = variablelist
+    if args.genmatchbranch is not None:
+        branches_to_read.append(args.genmatchbranch)
+
+
+
+
+
+    # read the input file
+    events = {}
+    treename = 'Events'
+    dummykey = 'all'
+    sampledict = {dummykey: [args.inputfile]}
+    print('Reading ntuple...')
+    events = read_sampledict(sampledict,
+                          mode='uproot',
+                          treename=treename,
+                          branches=branches_to_read,
+                          entry_start=args.entry_start,
+                          entry_stop=args.entry_stop)
+
+    # flatten all variables
+    new_events = {}
+    for key, sample in events.items():
+        new_sample = {}
+        for variable in sample.fields:
+            new_sample[variable] = ak.flatten(sample[variable], axis=None)
+        new_sample = ak.Array(new_sample)
+        new_events[key] = new_sample
+    events = new_events
+
+    # split in gen-matched and non-gen-matched
+    if args.genmatchbranch is not None:
+        mask_matching = events[dummykey][args.genmatchbranch].to_numpy().astype(bool)
+        events_matched = events[dummykey][mask_matching]
+        events_notmatched = events[dummykey][~mask_matching]
+        events = {}
+        events['notmatched'] = events_notmatched
+        events['matched'] = events_matched
+
+    sigvar = 'matched'    
+    '''
     # load the input files
-    sigvar = 'isSignal'
+    sigvar = 'matched'
     events = make_input_file(sigfiles=args.sigfiles,
       bkgfiles=args.bkgfiles,
       nentriesperfile=args.nentriesperfile,
       sigvar=sigvar)
-
+    '''
+    
     # define signal mask
     #sig_mask = (events.MET.pt > 55.) # only for testing
     sig_mask = getattr(events, sigvar)
