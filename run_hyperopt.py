@@ -104,8 +104,8 @@ if __name__=='__main__':
 
     # read arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--sigfiles', required=True, nargs='+')
-    parser.add_argument('-b', '--bkgfiles', default=[], nargs='+')
+    parser.add_argument('-i', '--inputfiles', required=True, nargs='+')
+   # parser.add_argument('-b', '--bkgfiles', default=[], nargs='+')
     parser.add_argument('-g', '--gridfile', required=True)
     parser.add_argument('-o', '--outputfile', default=None)
     parser.add_argument('-n', '--niterations', type=int, default=10)
@@ -115,53 +115,13 @@ if __name__=='__main__':
     parser.add_argument('--nstartup', type=int, default=10)
     args = parser.parse_args()
 
-    # read variables
-    variables = read_variables(args.variables)
-    variablelist = [v.variable for v in variables]
-
-    # set branches to read
-    branches_to_read = variablelist
-    if args.genmatchbranch is not None:
-        branches_to_read.append(args.genmatchbranch)
-
-
-
-
-
-    # read the input file
-    events = {}
-    treename = 'Events'
-    dummykey = 'all'
-    sampledict = {dummykey: [args.inputfile]}
-    print('Reading ntuple...')
-    events = read_sampledict(sampledict,
-                          mode='uproot',
-                          treename=treename,
-                          branches=branches_to_read)
-
-    # flatten all variables
-    new_events = {}
-    for key, sample in events.items():
-        new_sample = {}
-        for variable in sample.fields:
-            new_sample[variable] = ak.flatten(sample[variable], axis=None)
-        new_sample = ak.Array(new_sample)
-        new_events[key] = new_sample
-    events = new_events
-
-    # split in gen-matched and non-gen-matched
-    if args.genmatchbranch is not None:
-        mask_matching = events[dummykey][args.genmatchbranch].to_numpy().astype(bool)
-        events_matched = events[dummykey][mask_matching]
-        events_notmatched = events[dummykey][~mask_matching]
-        events = {}
-        events['notmatched'] = events_notmatched
-        events['matched'] = events_matched
-
-    sigvar = 'matched'    
-    '''
+    sigvar = 'args.genmatchbranch' 
     # load the input files
     sigvar = 'matched'
+    events = make_input_file(inputfiles=args.inputfiles,
+      nentriesperfile=args.nentriesperfile,
+      sigvar=sigvar)
+    '''
     events = make_input_file(sigfiles=args.sigfiles,
       bkgfiles=args.bkgfiles,
       nentriesperfile=args.nentriesperfile,
