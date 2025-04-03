@@ -137,9 +137,7 @@ if __name__=='__main__':
     events = read_sampledict(sampledict,
                           mode='uproot',
                           treename=treename,
-                          branches=branches_to_read,
-                          entry_start=args.entry_start,
-                          entry_stop=args.entry_stop)
+                          branches=branches_to_read)
 
     # flatten all variables
     new_events = {}
