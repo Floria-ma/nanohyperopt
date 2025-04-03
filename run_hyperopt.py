@@ -17,7 +17,6 @@ from functools import partial
 # local imports
 sys.path.append('tools')
 from make_input_file import make_input_file
-from variabletools import read_variables
 
 
 def pass_selection( events, cuts ):
@@ -104,33 +103,30 @@ if __name__=='__main__':
 
     # read arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--inputfiles', required=True, nargs='+')
-   # parser.add_argument('-b', '--bkgfiles', default=[], nargs='+')
+    parser.add_argument('-s', '--sigfiles', required=True, nargs='+')
+    parser.add_argument('-b', '--bkgfiles', default=[], nargs='+')
     parser.add_argument('-g', '--gridfile', required=True)
     parser.add_argument('-o', '--outputfile', default=None)
     parser.add_argument('-n', '--niterations', type=int, default=10)
     parser.add_argument('-l', '--lossfunction', default='s/b')
-    parser.add_argument('--genmatchbranch', required=True)
     parser.add_argument('--nentriesperfile', type=int, default=-1)
     parser.add_argument('--nstartup', type=int, default=10)
     args = parser.parse_args()
 
-    sigvar = args.genmatchbranch 
+    # print arguments
+    print('Running with following configuration:')
+    for arg in vars(args): print('  - {}: {}'.format(arg,getattr(args,arg))) 
+
     # load the input files
-    sigvar = args.genmatchbranch
-    events = make_input_file(inputfiles=args.inputfiles,
-      nentriesperfile=args.nentriesperfile,
-      sigvar=sigvar)
-    '''
+    sigvar = 'isSignal'
     events = make_input_file(sigfiles=args.sigfiles,
       bkgfiles=args.bkgfiles,
       nentriesperfile=args.nentriesperfile,
       sigvar=sigvar)
-    '''
-    
+
     # define signal mask
     #sig_mask = (events.MET.pt > 55.) # only for testing
-    sig_mask = getattr(events, sigvar).to_numpy().astype(bool)
+    sig_mask = getattr(events, sigvar)
 
     # do some printouts
     print('Number of events from inut files:')
