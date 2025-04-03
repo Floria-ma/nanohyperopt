@@ -12,7 +12,8 @@ from coffea.nanoevents import NanoEventsFactory, NanoAODSchema
 
 
 def make_input_file(
-    inputfiles=[],
+    sigfiles=[],
+    bkgfiles=[],
     nentriesperfile=-1,
     sigvar='isSignal'):
     
