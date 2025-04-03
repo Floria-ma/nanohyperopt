@@ -115,9 +115,9 @@ if __name__=='__main__':
     parser.add_argument('--nstartup', type=int, default=10)
     args = parser.parse_args()
 
-    sigvar = 'args.genmatchbranch' 
+    sigvar = args.genmatchbranch 
     # load the input files
-    sigvar = 'matched'
+    sigvar = args.genmatchbranch
     events = make_input_file(inputfiles=args.inputfiles,
       nentriesperfile=args.nentriesperfile,
       sigvar=sigvar)
@@ -130,7 +130,7 @@ if __name__=='__main__':
     
     # define signal mask
     #sig_mask = (events.MET.pt > 55.) # only for testing
-    sig_mask = getattr(events, sigvar)
+    sig_mask = getattr(events, sigvar).to_numpy().astype(bool)
 
     # do some printouts
     print('Number of events from inut files:')
