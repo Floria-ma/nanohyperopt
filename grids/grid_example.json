@@ -1,3 +1,4 @@
+'''
 [
 {"variable": "MET_pt",
  "cuttype": "min",
@@ -12,5 +13,29 @@
  "minvalue": 0.0,
  "maxvalue": 100.0,
  "stepsize": 5.0
+}
+]
+'''
+[
+{"variable": "DsMeson_tr1tr2_deltaR",
+ "cuttype": "min",
+ "hptype": "quniform",
+ "minvalue": 0.0, 
+ "maxvalue": 0.27, 
+ "stepsize": 0.01
+},
+{"variable": "DsMeson_KPlus_pt",
+ "cuttype": "max",
+ "hptype": "quniform",
+ "minvalue": 0.6,
+ "maxvalue": 5,
+ "stepsize": 0.1
+},
+{"variable": "DsMeson_KMinus_pt",
+ "cuttype": "max",
+ "hptype": "quniform",
+ "minvalue": 0.6,
+ "maxvalue": 5,
+ "stepsize": 0.1
 }
 ]
