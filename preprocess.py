@@ -17,6 +17,7 @@ if __name__=='__main__':
     args = parser.parse_args()
 
     #input_file = ROOT.TFile.Open(args.inputfiles)
+    input_files = args.inputfiles  # no reading, no open()
     # Open the input ROOT file
     input_tree = ROOT.TChain(args.inputtree)
     for infile in args.inputfiles:
@@ -27,13 +28,16 @@ if __name__=='__main__':
     output_file = ROOT.TFile(f"{basename}_DsSig.root", "RECREATE")
     output_tree = input_tree.CloneTree(0)  # Empty tree with same structure
 
-    output_file2 = ROOT.TFile("DsBkg.root", "RECREATE")
+    #output_file2 = ROOT.TFile("DsBkg.root", "RECREATE")
+    output_file2 = ROOT.TFile(f"{basename}_DsBkg.root", "RECREATE")
     output_tree2 = input_tree.CloneTree(0)  # Empty tree with same structure
 
-    output_file3 = ROOT.TFile("DstarSig.root", "RECREATE")
+    #output_file3 = ROOT.TFile("DstarSig.root", "RECREATE")
+    output_file3 = ROOT.TFile(f"{basename}_DstarSig.root", "RECREATE")
     output_tree3 = input_tree.CloneTree(0)  # Empty tree with same structure
 
-    output_file4 = ROOT.TFile("DstarBkg.root", "RECREATE")
+    #output_file4 = ROOT.TFile("DstarBkg.root", "RECREATE")
+    output_file4 = ROOT.TFile(f"{basename}_DstarBkg.root", "RECREATE")
     output_tree4 = input_tree.CloneTree(0)  # Empty tree with same structure
 
     # Loop over events
@@ -48,14 +52,13 @@ if __name__=='__main__':
 
     for i in range(n_entries):
 
-        if i % 10000 == 0:
-            print(f'Processing event {i}/{n_entries}')
+            if i % 10000 == 0:
+                print(f'Processing event {i}/{n_entries}')
 
-        input_tree.GetEntry(i)
+            input_tree.GetEntry(i)
 
         # nDsMeson = getattr(input_tree, "DsMeson_pt")  # Get number of DsMesons
         # Check if any DsMeson is matched
-        if input_tree.
             has_match = False
             for j in range(len(input_tree.DsMeson_pt)):  # Loop over DsMeson candidates
                 if getattr(input_tree, "DsMeson_hasFastGenmatch")[j]:  # Proper indexing
