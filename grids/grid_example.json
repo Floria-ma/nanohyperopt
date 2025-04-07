@@ -19,5 +19,19 @@
  "minvalue": 0.6,
  "maxvalue": 5,
  "stepsize": 0.1
+},
+ {"variable": "DsMeson_PhiMeson_mass",
+ "cuttype": "min",
+ "hptype": "quniform",
+ "minvalue": 1.04,
+ "maxvalue": 1.09,
+ "stepsize": 0.05
+},
+ {"variable": "DsMeson_mass",
+ "cuttype": "max",
+ "hptype": "quniform",
+ "minvalue": 1.86,
+ "maxvalue": 1.95,
+ "stepsize": 0.01
 }
 ]
