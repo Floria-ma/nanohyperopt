@@ -1,8 +1,4 @@
-#####################################
-# Run hyperopt for cut optimization #
-#####################################
-
-
+import ROOT
 # imports
 import sys
 import os
@@ -13,11 +9,40 @@ import pickle as pkl
 from coffea.nanoevents import NanoEventsFactory, NanoAODSchema
 from hyperopt import hp, fmin, tpe, STATUS_OK, Trials
 from functools import partial
+import uproot
 
 # local imports
 sys.path.append('tools')
 from make_input_file import make_input_file
 
+#####################################
+# Run hyperopt for cut optimization #
+#####################################
+
+def make_input_file(
+    sigfiles=[],
+    bkgfiles=[],
+    nentriesperfile=-1,
+    sigvar='isSignal',
+):
+    issignal = [True] * len(sigfiles) + [False] * len(bkgfiles)
+    allevents = []
+
+    for idx, inputfile in enumerate(sigfiles + bkgfiles):
+        tree = uproot.open(f"{inputfile}:Events")
+        
+        # Load all branches, optionally limit number of entries
+        events = tree.arrays(entry_stop=nentriesperfile if nentriesperfile >= 0 else None, library="ak")
+
+        # Add signal label to each event
+        events = ak.with_field(events, issignal[idx], where=sigvar)
+
+        allevents.append(events)
+
+    # Concatenate all signal and background events
+    events = ak.concatenate(allevents)
+
+    return events
 
 def pass_selection( events, cuts ):
     ### get a mask for a particular configuration of cuts
@@ -37,10 +62,11 @@ def pass_selection( events, cuts ):
             raise Exception('ERROR: cut {} is neither min nor max.'.format(cutname))
         varname = cutname[:-4]
         # parse variable name
-        varnameparts = varname.split('_')
+       # varnameparts = varname.split('_')
         # get the variable value
-        varvalue = getattr(events, varnameparts[0])
-        for varnamepart in varnameparts[1:]: varvalue = getattr(varvalue, varnamepart)
+        varvalue = events[varname]
+        
+       # for varnamepart in varnameparts[1:]: varvalue = getattr(varvalue, varnamepart)
         # if the varvalue is an array instead of a single value per event,
         # take minimum or maximum depending on the cut type
         if(varvalue.layout.minmax_depth[0]==1): pass
