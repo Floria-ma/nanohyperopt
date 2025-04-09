@@ -1,5 +1,12 @@
 [
 {"variable": "DStarMeson_DZeroMeson_massDiff",
+ "cuttype": "max",
+ "hptype": "quniform",
+ "minvalue": 0.14,
+ "maxvalue": 0.24,
+ "stepsize": 0.01
+},
+ {"variable": "DStarMeson_DZeroMeson_massDiff",
  "cuttype": "min",
  "hptype": "quniform",
  "minvalue": 0.14,
@@ -7,21 +14,21 @@
  "stepsize": 0.01
 },
 {"variable": "DStarMeson_tr3d0_deltaR",
- "cuttype": "min",
+ "cuttype": "max",
  "hptype": "quniform",
  "minvalue": 0,
  "maxvalue": 0.12,
  "stepsize": 0.01
 },
 {"variable": "DStarMeson_K_pt",
- "cuttype": "max",
+ "cuttype": "min",
  "hptype": "quniform",
  "minvalue": 0,
  "maxvalue": 130,
  "stepsize": 5
 },
  {"variable": "DStarMeson_Pi1_pt",
- "cuttype": "max",
+ "cuttype": "min",
  "hptype": "quniform",
  "minvalue": 0,
  "maxvalue": 16,
